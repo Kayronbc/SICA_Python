@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h1 class="h4 mb-0">Chamado #{{ chamado.id }}</h1>
+  <a class="btn btn-outline-secondary btn-sm" href="javascript:history.back()">Voltar</a>
+</div>
+
+<div class="row g-3">
+  <div class="col-12 col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <p class="mb-1"><strong>Título:</strong> {{ chamado.titulo }}</p>
+        <p class="mb-1"><strong>Categoria:</strong> {{ chamado.categoria }}</p>
+        <p class="mb-1"><strong>Status:</strong> {{ chamado.status }}</p>
+        <hr>
+        <p class="mb-0"><strong>Descrição:</strong></p>
+        <p class="mb-0">{{ chamado.descricao }}</p>
+      </div>
+    </div>
+
+    {% if is_secretaria %}
+      <div class="card shadow-sm mt-3">
+        <div class="card-body">
+          <h2 class="h6">Atualizar status (Secretaria)</h2>
+          <form method="post">
+            {% csrf_token %}
+            {{ status_form.as_p }}
+            <button type="submit" name="atualizar_status" class="btn btn-primary btn-sm">Atualizar</button>
+          </form>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="col-12 col-lg-7">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h6">Comentários</h2>
+
+        {% if chamado.comentarios.all %}
+          <ul class="list-group mb-3">
+            {% for comentario in chamado.comentarios.all %}
+              <li class="list-group-item">
+                <div class="d-flex justify-content-between">
+                  <strong>{{ comentario.autor.username }}</strong>
+                  <small class="text-muted">{{ comentario.criado_em }}</small>
+                </div>
+                <div>{{ comentario.mensagem }}</div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-muted">Sem comentários ainda.</p>
+        {% endif %}
+
+        <h2 class="h6">Adicionar comentário</h2>
+        <form method="post">
+          {% csrf_token %}
+          {{ comentario_form.as_p }}
+          <button type="submit" name="enviar_comentario" class="btn btn-success btn-sm">Enviar</button>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

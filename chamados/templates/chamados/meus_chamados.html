@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h1 class="h4 mb-0">Meus Chamados</h1>
+  <a class="btn btn-success btn-sm" href="/abrir-chamado/">+ Abrir Chamado</a>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    {% if chamados %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Título</th>
+              <th>Status</th>
+              <th>Criado em</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for chamado in chamados %}
+              <tr style="cursor:pointer" onclick="window.location='/chamado/{{ chamado.id }}/'">
+                <td>#{{ chamado.id }}</td>
+                <td>{{ chamado.titulo }}</td>
+                <td>{{ chamado.status }}</td>
+                <td>{{ chamado.criado_em }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="mb-0 text-muted">Você não possui chamados.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

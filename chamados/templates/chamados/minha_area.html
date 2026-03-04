@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="h4 mb-3">Minha Área</h1>
+
+<div class="row g-3 mb-3">
+  <div class="col-12 col-md-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="text-muted">Abertos</div>
+        <div class="fs-3 fw-semibold">{{ total_abertos }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-md-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="text-muted">Em atendimento</div>
+        <div class="fs-3 fw-semibold">{{ total_em_atendimento }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-md-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="text-muted">Concluídos</div>
+        <div class="fs-3 fw-semibold">{{ total_concluidos }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h2 class="h6">Últimos chamados</h2>
+
+    {% if ultimos %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Título</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for chamado in ultimos %}
+              <tr style="cursor:pointer" onclick="window.location='/chamado/{{ chamado.id }}/'">
+                <td>#{{ chamado.id }}</td>
+                <td>{{ chamado.titulo }}</td>
+                <td>{{ chamado.status }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-muted mb-0">Você ainda não abriu chamados.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
