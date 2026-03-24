@@ -1,43 +1,40 @@
+from datetime import datetime, time
+
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-
-from .models import Chamado
-from .permissoes import only_secretaria
-
-from .forms import ChamadoForm, StatusChamadoForm
-from django.shortcuts import redirect
-
-from django.shortcuts import get_object_or_404
-from django.http import HttpResponseForbidden
-from .forms import ComentarioForm
-
-from .models import Chamado, Categoria
 from django.core.paginator import Paginator
+from django.http import HttpResponseForbidden
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+
+from .forms import ChamadoForm, ComentarioForm, StatusChamadoForm
+from .models import Categoria, Chamado
+from .permissoes import is_secretaria, only_aluno_area, only_secretaria
 
 
 @login_required
+@only_aluno_area
 def meus_chamados(request):
-    chamados = Chamado.objects.filter(aluno=request.user)
+    chamados = Chamado.objects.filter(aluno=request.user).order_by("-criado_em")
     return render(request, "chamados/meus_chamados.html", {"chamados": chamados})
 
 
+@login_required
 @only_secretaria
 def chamados_secretaria(request):
-    chamados = Chamado.objects.all().select_related("categoria", "aluno")
+    qs = Chamado.objects.all().select_related("categoria", "aluno")
 
-    status = request.GET.get("status")
-    categoria = request.GET.get("categoria")
-    ordenar = request.GET.get("ordenar", "-criado_em")
+    status = request.GET.get("status", "")
+    categoria = request.GET.get("categoria", "")
 
     if status:
-        chamados = chamados.filter(status=status)
+        qs = qs.filter(status=status)
 
     if categoria:
-        chamados = chamados.filter(categoria_id=categoria)
+        qs = qs.filter(categoria_id=categoria)
 
-    chamados = chamados.order_by(ordenar)
+    qs = qs.order_by("-criado_em")
 
-    paginator = Paginator(chamados, 5)  # 5 por página
+    paginator = Paginator(qs, 5)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
@@ -47,15 +44,17 @@ def chamados_secretaria(request):
         request,
         "chamados/chamados_secretaria.html",
         {
+            "chamados": page_obj,
             "page_obj": page_obj,
             "categorias": categorias,
-            "status_atual": status or "",
-            "categoria_atual": categoria or "",
-            "ordenar": ordenar,
+            "status_atual": status,
+            "categoria_atual": categoria,
         },
     )
 
+
 @login_required
+@only_aluno_area
 def abrir_chamado(request):
     if request.method == "POST":
         form = ChamadoForm(request.POST)
@@ -69,29 +68,32 @@ def abrir_chamado(request):
 
     return render(request, "chamados/abrir_chamado.html", {"form": form})
 
+
 @login_required
 def detalhe_chamado(request, id):
     chamado = get_object_or_404(Chamado, id=id)
 
-    # Regra de acesso: aluno só vê o próprio
-    is_secretaria = request.user.is_superuser or request.user.groups.filter(name="Secretaria").exists()
-    if not is_secretaria and chamado.aluno != request.user:
+    usuario_eh_secretaria = is_secretaria(request.user)
+
+    if not usuario_eh_secretaria and chamado.aluno != request.user:
         return HttpResponseForbidden("Acesso negado.")
 
-    # Forms
     comentario_form = ComentarioForm()
     status_form = StatusChamadoForm(instance=chamado)
 
     if request.method == "POST":
-        # Atualizar status (só secretaria/admin)
         if "atualizar_status" in request.POST:
-            if not is_secretaria:
+            if not usuario_eh_secretaria:
                 return HttpResponseForbidden("Acesso negado.")
+
             status_form = StatusChamadoForm(request.POST, instance=chamado)
             if status_form.is_valid():
                 status_form.save()
+                Chamado.objects.filter(id=chamado.id).update(
+                    ultima_interacao_em=timezone.now()
+                )
+                return redirect("detalhe_chamado", id=chamado.id)
 
-        # Adicionar comentário (aluno ou secretaria)
         elif "enviar_comentario" in request.POST:
             comentario_form = ComentarioForm(request.POST)
             if comentario_form.is_valid():
@@ -100,6 +102,11 @@ def detalhe_chamado(request, id):
                 comentario.chamado = chamado
                 comentario.save()
 
+                Chamado.objects.filter(id=chamado.id).update(
+                    ultima_interacao_em=timezone.now()
+                )
+                return redirect("detalhe_chamado", id=chamado.id)
+
     return render(
         request,
         "chamados/detalhe_chamado.html",
@@ -107,12 +114,82 @@ def detalhe_chamado(request, id):
             "chamado": chamado,
             "comentario_form": comentario_form,
             "status_form": status_form,
-            "is_secretaria": is_secretaria,
+            "is_secretaria": usuario_eh_secretaria,
         },
     )
 
+
 @login_required
 def minha_area(request):
+    usuario_eh_secretaria = is_secretaria(request.user)
+
+    if request.user.is_superuser:
+        chamados = Chamado.objects.all()
+
+        data_inicial = request.GET.get("data_inicial", "").strip()
+        data_final = request.GET.get("data_final", "").strip()
+
+        if data_inicial:
+            try:
+                data_inicial_obj = datetime.strptime(data_inicial, "%Y-%m-%d").date()
+                data_inicial_dt = timezone.make_aware(
+                    datetime.combine(data_inicial_obj, time.min)
+                )
+                chamados = chamados.filter(criado_em__gte=data_inicial_dt)
+            except ValueError:
+                data_inicial = ""
+
+        if data_final:
+            try:
+                data_final_obj = datetime.strptime(data_final, "%Y-%m-%d").date()
+                data_final_dt = timezone.make_aware(
+                    datetime.combine(data_final_obj, time.max)
+                )
+                chamados = chamados.filter(criado_em__lte=data_final_dt)
+            except ValueError:
+                data_final = ""
+
+        total_abertos = chamados.filter(status="ABERTO").count()
+        total_em_atendimento = chamados.filter(status="EM_ATENDIMENTO").count()
+        total_concluidos = chamados.filter(status="CONCLUIDO").count()
+        total_geral = chamados.count()
+
+        return render(
+            request,
+            "chamados/minha_area.html",
+            {
+                "dashboard_admin": True,
+                "dashboard_secretaria": False,
+                "total_abertos": total_abertos,
+                "total_em_atendimento": total_em_atendimento,
+                "total_concluidos": total_concluidos,
+                "total_geral": total_geral,
+                "ultimos": chamados.order_by("-ultima_interacao_em")[:8],
+                "data_inicial": data_inicial,
+                "data_final": data_final,
+            },
+        )
+
+    if usuario_eh_secretaria:
+        chamados = Chamado.objects.all().order_by("-ultima_interacao_em")
+
+        total_abertos = chamados.filter(status="ABERTO").count()
+        total_em_atendimento = chamados.filter(status="EM_ATENDIMENTO").count()
+        total_concluidos = chamados.filter(status="CONCLUIDO").count()
+
+        return render(
+            request,
+            "chamados/minha_area.html",
+            {
+                "dashboard_admin": False,
+                "dashboard_secretaria": True,
+                "total_abertos": total_abertos,
+                "total_em_atendimento": total_em_atendimento,
+                "total_concluidos": total_concluidos,
+                "ultimos": chamados[:5],
+            },
+        )
+
     chamados = Chamado.objects.filter(aluno=request.user)
 
     total_abertos = chamados.filter(status="ABERTO").count()
@@ -123,35 +200,11 @@ def minha_area(request):
         request,
         "chamados/minha_area.html",
         {
+            "dashboard_admin": False,
+            "dashboard_secretaria": False,
             "total_abertos": total_abertos,
             "total_em_atendimento": total_em_atendimento,
             "total_concluidos": total_concluidos,
-            "ultimos": chamados[:5],
-        },
-    )
-
-@only_secretaria
-def chamados_secretaria(request):
-    chamados = Chamado.objects.all().select_related("categoria", "aluno")
-
-    status = request.GET.get("status")
-    categoria = request.GET.get("categoria")
-
-    if status:
-        chamados = chamados.filter(status=status)
-
-    if categoria:
-        chamados = chamados.filter(categoria_id=categoria)
-
-    categorias = Categoria.objects.all().order_by("nome")
-
-    return render(
-        request,
-        "chamados/chamados_secretaria.html",
-        {
-            "chamados": chamados,
-            "categorias": categorias,
-            "status_atual": status or "",
-            "categoria_atual": categoria or "",
+            "ultimos": chamados.order_by("-criado_em")[:5],
         },
     )

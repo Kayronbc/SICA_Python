@@ -1,12 +1,33 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Abrir Chamado</h1>
+<div class="sica-page-header">
+  <div>
+    <h1 class="sica-section-title">Abrir Chamado</h1>
+    <p class="sica-section-subtitle">Preencha os dados abaixo para registrar sua solicitação acadêmica.</p>
+  </div>
 
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Enviar</button>
-</form>
+  <div class="sica-page-actions">
+    <a class="btn btn-outline-secondary sica-btn-soft" href="/meus-chamados/">Voltar</a>
+  </div>
+</div>
 
+<div class="row justify-content-center">
+  <div class="col-12 col-xl-8">
+    <div class="card shadow-sm sica-soft-card">
+      <div class="card-body p-4 p-lg-5">
+        <div class="sica-form-soft sica-form-shell">
+          <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="d-flex gap-2 flex-wrap mt-3">
+              <button type="submit" class="btn btn-primary sica-btn-primary">Enviar chamado</button>
+              <a href="/meus-chamados/" class="btn btn-outline-secondary sica-btn-soft">Cancelar</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

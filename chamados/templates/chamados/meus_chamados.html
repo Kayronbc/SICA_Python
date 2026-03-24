@@ -1,16 +1,22 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="d-flex align-items-center justify-content-between mb-3">
-  <h1 class="h4 mb-0">Meus Chamados</h1>
-  <a class="btn btn-success btn-sm" href="/abrir-chamado/">+ Abrir Chamado</a>
+<div class="sica-page-header">
+  <div>
+    <h1 class="sica-section-title">Meus Chamados</h1>
+    <p class="sica-section-subtitle">Consulte todos os chamados abertos no seu acesso.</p>
+  </div>
+
+  <div class="sica-page-actions">
+    <a class="btn btn-success sica-btn-success" href="/abrir-chamado/">+ Abrir Chamado</a>
+  </div>
 </div>
 
-<div class="card shadow-sm">
-  <div class="card-body">
+<div class="card shadow-sm sica-soft-card">
+  <div class="card-body p-4">
     {% if chamados %}
       <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
+        <table class="table table-hover align-middle">
           <thead>
             <tr>
               <th>ID</th>
@@ -24,15 +30,25 @@
               <tr style="cursor:pointer" onclick="window.location='/chamado/{{ chamado.id }}/'">
                 <td>#{{ chamado.id }}</td>
                 <td>{{ chamado.titulo }}</td>
-                <td>{{ chamado.status }}</td>
-                <td>{{ chamado.criado_em }}</td>
+                <td>
+                  {% if chamado.status == "ABERTO" %}
+                    <span class="sica-badge sica-badge-open">Aberto</span>
+                  {% elif chamado.status == "EM_ATENDIMENTO" %}
+                    <span class="sica-badge sica-badge-progress">Em atendimento</span>
+                  {% elif chamado.status == "CONCLUIDO" %}
+                    <span class="sica-badge sica-badge-done">Concluído</span>
+                  {% endif %}
+                </td>
+                <td>{{ chamado.criado_em|date:"d/m/Y H:i" }}</td>
               </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
     {% else %}
-      <p class="mb-0 text-muted">Você não possui chamados.</p>
+      <div class="sica-empty-state">
+        Você não possui chamados.
+      </div>
     {% endif %}
   </div>
 </div>

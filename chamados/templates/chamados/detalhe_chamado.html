@@ -1,66 +1,130 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="d-flex align-items-center justify-content-between mb-3">
-  <h1 class="h4 mb-0">Chamado #{{ chamado.id }}</h1>
-  <a class="btn btn-outline-secondary btn-sm" href="javascript:history.back()">Voltar</a>
+<div class="sica-page-header">
+  <div>
+    <h1 class="sica-section-title">Chamado #{{ chamado.id }}</h1>
+    <p class="sica-section-subtitle">Acompanhe os detalhes e a comunicação deste atendimento.</p>
+  </div>
+
+  <div class="sica-page-actions">
+    <a class="btn btn-outline-secondary sica-btn-soft" href="javascript:history.back()">Voltar</a>
+  </div>
 </div>
 
-<div class="row g-3">
-  <div class="col-12 col-lg-5">
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <p class="mb-1"><strong>Título:</strong> {{ chamado.titulo }}</p>
-        <p class="mb-1"><strong>Categoria:</strong> {{ chamado.categoria }}</p>
-        <p class="mb-1"><strong>Status:</strong> {{ chamado.status }}</p>
-        <hr>
-        <p class="mb-0"><strong>Descrição:</strong></p>
-        <p class="mb-0">{{ chamado.descricao }}</p>
+<div class="row g-4 sica-detail-layout">
+  <div class="col-12 col-xl-5">
+    <div class="card shadow-sm sica-soft-card">
+      <div class="card-body p-4">
+        <div class="d-flex align-items-start justify-content-between mb-3">
+          <div>
+            <div class="sica-meta-label">Título do chamado</div>
+            <div class="fs-5 fw-bold">{{ chamado.titulo }}</div>
+          </div>
+
+          <div>
+            {% if chamado.status == "ABERTO" %}
+              <span class="sica-badge sica-badge-open">Aberto</span>
+            {% elif chamado.status == "EM_ATENDIMENTO" %}
+              <span class="sica-badge sica-badge-progress">Em atendimento</span>
+            {% elif chamado.status == "CONCLUIDO" %}
+              <span class="sica-badge sica-badge-done">Concluído</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="sica-meta-list mb-4">
+          <div class="sica-meta-item">
+            <div class="sica-meta-label">Categoria</div>
+            <div class="sica-meta-value">{{ chamado.categoria }}</div>
+          </div>
+
+          <div class="sica-meta-item">
+            <div class="sica-meta-label">Criado em</div>
+            <div class="sica-meta-value">{{ chamado.criado_em|date:"d/m/Y H:i" }}</div>
+          </div>
+
+          <div class="sica-meta-item">
+            <div class="sica-meta-label">Última atualização</div>
+            <div class="sica-meta-value">{{ chamado.ultima_interacao_em|date:"d/m/Y H:i" }}</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="sica-meta-label">Descrição</div>
+          <div class="sica-description-box">
+            {{ chamado.descricao }}
+          </div>
+        </div>
       </div>
     </div>
 
     {% if is_secretaria %}
-      <div class="card shadow-sm mt-3">
-        <div class="card-body">
-          <h2 class="h6">Atualizar status (Secretaria)</h2>
-          <form method="post">
-            {% csrf_token %}
-            {{ status_form.as_p }}
-            <button type="submit" name="atualizar_status" class="btn btn-primary btn-sm">Atualizar</button>
-          </form>
+      <div class="card shadow-sm sica-soft-card mt-4">
+        <div class="card-body p-4">
+          <div class="mb-3">
+            <h2 class="h5 mb-1">Atualizar status</h2>
+            <p class="sica-top-note mb-0">Altere o andamento do chamado conforme o atendimento evoluir.</p>
+          </div>
+
+          <div class="sica-form-soft sica-form-shell">
+            <form method="post">
+              {% csrf_token %}
+              {{ status_form.as_p }}
+              <button type="submit" name="atualizar_status" class="btn btn-primary sica-btn-primary">
+                Atualizar status
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     {% endif %}
   </div>
 
-  <div class="col-12 col-lg-7">
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <h2 class="h6">Comentários</h2>
+  <div class="col-12 col-xl-7">
+    <div class="card shadow-sm sica-soft-card mb-4">
+      <div class="card-body p-4">
+        <div class="mb-3">
+          <h2 class="h5 mb-1">Comentários</h2>
+          <p class="sica-top-note mb-0">Histórico de comunicação entre aluno e secretaria.</p>
+        </div>
 
         {% if chamado.comentarios.all %}
-          <ul class="list-group mb-3">
+          <div class="sica-comment-list">
             {% for comentario in chamado.comentarios.all %}
-              <li class="list-group-item">
-                <div class="d-flex justify-content-between">
-                  <strong>{{ comentario.autor.username }}</strong>
-                  <small class="text-muted">{{ comentario.criado_em }}</small>
+              <div class="sica-comment-item">
+                <div class="sica-comment-head">
+                  <div class="sica-comment-author">{{ comentario.autor.username }}</div>
+                  <div class="sica-comment-date">{{ comentario.criado_em|date:"d/m/Y H:i" }}</div>
                 </div>
                 <div>{{ comentario.mensagem }}</div>
-              </li>
+              </div>
             {% endfor %}
-          </ul>
+          </div>
         {% else %}
-          <p class="text-muted">Sem comentários ainda.</p>
+          <div class="sica-empty-state">
+            Sem comentários ainda.
+          </div>
         {% endif %}
+      </div>
+    </div>
 
-        <h2 class="h6">Adicionar comentário</h2>
-        <form method="post">
-          {% csrf_token %}
-          {{ comentario_form.as_p }}
-          <button type="submit" name="enviar_comentario" class="btn btn-success btn-sm">Enviar</button>
-        </form>
+    <div class="card shadow-sm sica-soft-card">
+      <div class="card-body p-4">
+        <div class="mb-3">
+          <h2 class="h5 mb-1">Adicionar comentário</h2>
+          <p class="sica-top-note mb-0">Registre uma nova mensagem para este chamado.</p>
+        </div>
 
+        <div class="sica-form-soft sica-form-shell">
+          <form method="post">
+            {% csrf_token %}
+            {{ comentario_form.as_p }}
+            <button type="submit" name="enviar_comentario" class="btn btn-success sica-btn-success">
+              Enviar comentário
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   </div>

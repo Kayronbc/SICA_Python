@@ -24,13 +24,22 @@ class Chamado(models.Model):
         on_delete=models.CASCADE,
         related_name="chamados_abertos",
     )
-    categoria = models.ForeignKey(Categoria, on_delete=models.PROTECT, related_name="chamados")
+    categoria = models.ForeignKey(
+        Categoria,
+        on_delete=models.PROTECT,
+        related_name="chamados",
+    )
     titulo = models.CharField(max_length=120)
     descricao = models.TextField()
-    status = models.CharField(max_length=20, choices=Status.choices, default=Status.ABERTO)
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.ABERTO,
+    )
 
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
+    ultima_interacao_em = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = "Chamado"
@@ -42,8 +51,15 @@ class Chamado(models.Model):
 
 
 class Comentario(models.Model):
-    chamado = models.ForeignKey(Chamado, on_delete=models.CASCADE, related_name="comentarios")
-    autor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    chamado = models.ForeignKey(
+        Chamado,
+        on_delete=models.CASCADE,
+        related_name="comentarios",
+    )
+    autor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
     mensagem = models.TextField()
     criado_em = models.DateTimeField(auto_now_add=True)
 
@@ -54,3 +70,9 @@ class Comentario(models.Model):
 
     def __str__(self):
         return f"Comentário {self.id} no chamado #{self.chamado_id}"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        Chamado.objects.filter(id=self.chamado_id).update(
+            ultima_interacao_em=self.criado_em
+        )

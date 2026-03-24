@@ -1,18 +1,23 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-12 col-md-6 col-lg-4">
-    <div class="card shadow-sm">
-      <div class="card-body p-4">
-        <h1 class="h4 mb-3">Login</h1>
+<div class="row justify-content-center align-items-center" style="min-height: 72vh;">
+  <div class="col-12 col-md-7 col-lg-5 col-xl-4">
+    <div class="card shadow-sm sica-login-card">
+      <div class="card-body">
+        <div class="text-center mb-4">
+          <div class="brand-dot mx-auto mb-3"></div>
+          <h1 class="sica-login-title mb-2">Bem-vindo ao SICA</h1>
+          <p class="sica-login-subtitle">Acesse sua conta para acompanhar e gerenciar chamados acadêmicos.</p>
+        </div>
 
-        <form method="post">
-          {% csrf_token %}
-          {{ form.as_p }}
-          <button type="submit" class="btn btn-primary w-100">Entrar</button>
-        </form>
-
+        <div class="sica-form-soft">
+          <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary sica-btn-primary w-100">Entrar</button>
+          </form>
+        </div>
       </div>
     </div>
   </div>

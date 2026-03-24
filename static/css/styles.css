@@ -1,22 +1,506 @@
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
+:root {
+  --sica-bg: #f4f7fb;
+  --sica-surface: rgba(255, 255, 255, 0.88);
+  --sica-surface-strong: #ffffff;
+  --sica-border: rgba(15, 23, 42, 0.08);
+  --sica-text: #14213d;
+  --sica-text-soft: #5f6b85;
+
+  --sica-primary: #2563eb;
+  --sica-primary-soft: #dbeafe;
+
+  --sica-open: #2563eb;
+  --sica-open-soft: #dbeafe;
+
+  --sica-progress: #facc15;
+  --sica-progress-soft: #fef3c7;
+
+  --sica-done: #16a34a;
+  --sica-done-soft: #dcfce7;
+
+  --sica-dark: #0f172a;
+  --sica-dark-2: #1e293b;
+
+  --sica-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+  --sica-shadow-soft: 0 10px 24px rgba(15, 23, 42, 0.06);
+  --sica-radius: 22px;
 }
 
-header {
-  background: #f2f2f2;
-  padding: 16px;
+body.sica-body {
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.10), transparent 26%),
+    radial-gradient(circle at top right, rgba(22, 163, 74, 0.08), transparent 20%),
+    linear-gradient(180deg, #f8fbff 0%, var(--sica-bg) 100%);
+  color: var(--sica-text);
+  min-height: 100vh;
 }
 
-main {
-  padding: 16px;
+.sica-navbar {
+  background: linear-gradient(135deg, var(--sica-dark) 0%, var(--sica-dark-2) 100%);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.20);
+  padding-top: 0.9rem;
+  padding-bottom: 0.9rem;
 }
 
-a {
-  text-decoration: none;
-  margin-right: 10px;
+.brand-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #60a5fa, #34d399);
+  box-shadow: 0 0 0 6px rgba(96, 165, 250, 0.12);
 }
 
-button {
-  cursor: pointer;
+.navbar-brand,
+.navbar .nav-link,
+.navbar .navbar-text {
+  color: #f8fafc !important;
+}
+
+.navbar .nav-link {
+  opacity: 0.84;
+  font-weight: 500;
+  transition: 0.2s ease;
+}
+
+.navbar .nav-link:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.sica-user-pill {
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  padding: 0.45rem 0.85rem;
+  display: inline-block;
+}
+
+.sica-logout-btn {
+  border-radius: 999px;
+  padding-inline: 1rem;
+}
+
+.card {
+  border: 1px solid var(--sica-border);
+  border-radius: var(--sica-radius);
+  box-shadow: var(--sica-shadow-soft);
+  background: var(--sica-surface);
+  backdrop-filter: blur(10px);
+}
+
+.card.shadow-sm {
+  box-shadow: var(--sica-shadow);
+}
+
+.sica-section-title {
+  font-size: 1.7rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 0;
+  color: var(--sica-text);
+}
+
+.sica-section-subtitle {
+  color: var(--sica-text-soft);
+  margin-top: 0.35rem;
+  margin-bottom: 0;
+}
+
+.sica-soft-card {
+  border-radius: 26px;
+  overflow: hidden;
+  position: relative;
+}
+
+.sica-soft-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.24), rgba(255,255,255,0));
+  pointer-events: none;
+}
+
+.sica-stat-card {
+  border: none;
+  color: #fff;
+  border-radius: 24px;
+  overflow: hidden;
+  position: relative;
+  min-height: 156px;
+}
+
+.sica-stat-card .card-body {
+  position: relative;
+  z-index: 2;
+}
+
+.sica-stat-card::after {
+  content: "";
+  position: absolute;
+  right: -18px;
+  bottom: -18px;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.sica-stat-open {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+}
+
+.sica-stat-progress {
+  background: linear-gradient(135deg, #facc15 0%, #eab308 100%);
+  color: #3b3200;
+}
+
+.sica-stat-done {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+}
+
+.sica-stat-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  opacity: 0.95;
+}
+
+.sica-stat-value {
+  font-size: 2.3rem;
+  font-weight: 800;
+  line-height: 1.1;
+  margin-top: 0.45rem;
+}
+
+.sica-icon-bubble {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.16);
+  color: inherit;
+}
+
+.table {
+  --bs-table-bg: transparent;
+  --bs-table-border-color: rgba(15, 23, 42, 0.06);
+  margin-bottom: 0;
+}
+
+.table thead th {
+  border-bottom-width: 1px;
+  color: var(--sica-text-soft);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.table tbody tr {
+  transition: 0.2s ease;
+}
+
+.table-hover tbody tr:hover {
+  background: rgba(37, 99, 235, 0.04);
+}
+
+.table td {
+  vertical-align: middle;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.sica-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  padding: 0.45rem 0.8rem;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.sica-badge-open {
+  color: var(--sica-open);
+  background: var(--sica-open-soft);
+}
+
+.sica-badge-progress {
+  color: #8a6a00;
+  background: var(--sica-progress-soft);
+}
+
+.sica-badge-done {
+  color: var(--sica-done);
+  background: var(--sica-done-soft);
+}
+
+.sica-page-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.sica-page-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.sica-btn-primary {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  border: none;
+  border-radius: 14px;
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.18);
+}
+
+.sica-btn-primary:hover {
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+}
+
+.sica-btn-success {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  border: none;
+  border-radius: 14px;
+  box-shadow: 0 12px 24px rgba(34, 197, 94, 0.18);
+}
+
+.sica-btn-success:hover {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+}
+
+.sica-btn-soft {
+  border-radius: 14px;
+}
+
+/* Formulários */
+form p {
+  margin-bottom: 1.1rem;
+}
+
+form p label,
+.form-label {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: var(--sica-text-soft);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="date"],
+input[type="datetime-local"],
+select,
+textarea,
+.form-control,
+.form-select {
+  width: 100%;
+  border-radius: 18px !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+  backdrop-filter: blur(10px);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.55), 0 6px 18px rgba(15, 23, 42, 0.04) !important;
+  min-height: 50px;
+  padding: 0.82rem 1rem !important;
+  color: var(--sica-text) !important;
+  transition: all 0.2s ease;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+textarea,
+textarea.form-control {
+  min-height: 140px;
+  resize: vertical;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+input[type="datetime-local"]:focus,
+select:focus,
+textarea:focus,
+.form-control:focus,
+.form-select:focus {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border-color: rgba(37, 99, 235, 0.38) !important;
+  box-shadow: 0 0 0 0.22rem rgba(37, 99, 235, 0.12), 0 10px 24px rgba(37, 99, 235, 0.08) !important;
+  outline: none;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #8fa0bb;
+}
+
+.sica-form-shell {
+  background: linear-gradient(180deg, rgba(255,255,255,0.78) 0%, rgba(248,251,255,0.88) 100%);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  border-radius: 24px;
+  padding: 1.2rem;
+}
+
+.sica-form-soft form p {
+  margin-bottom: 1.25rem;
+}
+
+.sica-form-soft .helptext {
+  display: block;
+  margin-top: 0.4rem;
+  color: var(--sica-text-soft);
+  font-size: 0.82rem;
+}
+
+.sica-form-soft ul.errorlist {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 0.5rem;
+  color: #b91c1c;
+  font-size: 0.9rem;
+}
+
+.sica-meta-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.sica-meta-item {
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  border-radius: 18px;
+  padding: 1rem 1.1rem;
+}
+
+.sica-meta-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--sica-text-soft);
+  margin-bottom: 0.35rem;
+  font-weight: 700;
+}
+
+.sica-meta-value {
+  font-weight: 700;
+  color: var(--sica-text);
+}
+
+.sica-description-box {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  border-radius: 20px;
+  padding: 1rem 1.1rem;
+  min-height: 140px;
+  color: var(--sica-text);
+}
+
+.sica-comment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.sica-comment-item {
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  background: #fff;
+  border-radius: 20px;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+}
+
+.sica-comment-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.45rem;
+}
+
+.sica-comment-author {
+  font-weight: 700;
+}
+
+.sica-comment-date {
+  color: var(--sica-text-soft);
+  font-size: 0.88rem;
+}
+
+.sica-empty-state {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  border: 1px dashed rgba(15, 23, 42, 0.10);
+  border-radius: 20px;
+  padding: 1.25rem;
+  color: var(--sica-text-soft);
+}
+
+.sica-filter-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(248,251,255,0.95) 100%);
+}
+
+.sica-login-card {
+  border-radius: 28px;
+  overflow: hidden;
+}
+
+.sica-login-card .card-body {
+  padding: 2rem;
+}
+
+.sica-login-title {
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.sica-login-subtitle {
+  color: var(--sica-text-soft);
+  margin-bottom: 1.5rem;
+}
+
+.pagination .page-link {
+  border-radius: 12px !important;
+  margin-right: 0.35rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  color: var(--sica-primary);
+}
+
+.pagination .page-item.disabled .page-link {
+  color: #7b869d;
+  background: #f8fafc;
+}
+
+.sica-detail-layout .card {
+  height: 100%;
+}
+
+.sica-top-note {
+  color: var(--sica-text-soft);
+  font-size: 0.95rem;
+}
+
+@media (max-width: 991px) {
+  .sica-page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sica-page-actions {
+    width: 100%;
+  }
+
+  .sica-page-actions .btn {
+    width: 100%;
+  }
 }
