@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Chamado, Comentario
+from .models import Chamado, Comentario, Anexo
 
 
 class ComentarioForm(forms.ModelForm):
@@ -19,3 +19,8 @@ class StatusChamadoForm(forms.ModelForm):
     class Meta:
         model = Chamado
         fields = ["status"]
+
+class AnexoForm(forms.ModelForm):
+    class Meta:
+        model = Anexo
+        fields = ["arquivo"]

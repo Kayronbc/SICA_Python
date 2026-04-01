@@ -29,3 +29,8 @@ urlpatterns = [
     path("chamado/<int:id>/", detalhe_chamado, name="detalhe_chamado"),
     path("secretaria/chamados/", chamados_secretaria, name="chamados_secretaria"),
 ]
+
+from django.conf import settings
+from django.conf.urls.static import static
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -76,3 +76,19 @@ class Comentario(models.Model):
         Chamado.objects.filter(id=self.chamado_id).update(
             ultima_interacao_em=self.criado_em
         )
+
+class Anexo(models.Model):
+    chamado = models.ForeignKey(
+        Chamado,
+        on_delete=models.CASCADE,
+        related_name="anexos",
+    )
+    arquivo = models.FileField(upload_to="anexos/")
+    enviado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+    enviado_em = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Anexo {self.id} - Chamado #{self.chamado_id}"

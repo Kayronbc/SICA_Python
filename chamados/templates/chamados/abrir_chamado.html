@@ -17,9 +17,15 @@
     <div class="card shadow-sm sica-soft-card">
       <div class="card-body p-4 p-lg-5">
         <div class="sica-form-soft sica-form-shell">
-          <form method="post">
+          <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             {{ form.as_p }}
+
+            <div class="mt-3">
+              <label class="form-label">Anexos</label>
+              <input type="file" name="arquivos" class="form-control" multiple>
+            </div>
+
             <div class="d-flex gap-2 flex-wrap mt-3">
               <button type="submit" class="btn btn-primary sica-btn-primary">Enviar chamado</button>
               <a href="/meus-chamados/" class="btn btn-outline-secondary sica-btn-soft">Cancelar</a>

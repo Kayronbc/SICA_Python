@@ -6,8 +6,8 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
-from .forms import ChamadoForm, ComentarioForm, StatusChamadoForm
-from .models import Categoria, Chamado
+from .forms import ChamadoForm, ComentarioForm, StatusChamadoForm, AnexoForm
+from .models import Categoria, Chamado, Anexo
 from .permissoes import is_secretaria, only_aluno_area, only_secretaria
 
 
@@ -58,10 +58,21 @@ def chamados_secretaria(request):
 def abrir_chamado(request):
     if request.method == "POST":
         form = ChamadoForm(request.POST)
+        arquivos = request.FILES.getlist("arquivos")
+
         if form.is_valid():
             chamado = form.save(commit=False)
             chamado.aluno = request.user
             chamado.save()
+
+            # salvar anexos
+            for arquivo in arquivos:
+                Anexo.objects.create(
+                    chamado=chamado,
+                    arquivo=arquivo,
+                    enviado_por=request.user
+                )
+
             return redirect("meus_chamados")
     else:
         form = ChamadoForm()
@@ -96,11 +107,21 @@ def detalhe_chamado(request, id):
 
         elif "enviar_comentario" in request.POST:
             comentario_form = ComentarioForm(request.POST)
+            arquivos = request.FILES.getlist("arquivos")
+
             if comentario_form.is_valid():
                 comentario = comentario_form.save(commit=False)
                 comentario.autor = request.user
                 comentario.chamado = chamado
                 comentario.save()
+
+                # salvar anexos no comentário (ligados ao chamado)
+                for arquivo in arquivos:
+                    Anexo.objects.create(
+                        chamado=chamado,
+                        arquivo=arquivo,
+                        enviado_por=request.user
+                    )
 
                 Chamado.objects.filter(id=chamado.id).update(
                     ultima_interacao_em=timezone.now()
