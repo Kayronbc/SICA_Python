@@ -73,9 +73,17 @@ class Comentario(models.Model):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
+
         Chamado.objects.filter(id=self.chamado_id).update(
             ultima_interacao_em=self.criado_em
         )
+
+        HistoricoChamado.objects.create(
+            chamado=self.chamado,
+            usuario=self.autor,
+            descricao="Adicionou um comentário"
+        )
+
 
 class Anexo(models.Model):
     chamado = models.ForeignKey(
@@ -92,3 +100,34 @@ class Anexo(models.Model):
 
     def __str__(self):
         return f"Anexo {self.id} - Chamado #{self.chamado_id}"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        HistoricoChamado.objects.create(
+            chamado=self.chamado,
+            usuario=self.enviado_por,
+            descricao=f"Anexou arquivo: {self.arquivo.name}"
+        )
+
+
+# 🔥 NOVO MODEL
+class HistoricoChamado(models.Model):
+    chamado = models.ForeignKey(
+        Chamado,
+        on_delete=models.CASCADE,
+        related_name="historico",
+    )
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+    )
+    descricao = models.CharField(max_length=255)
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["criado_em"]
+
+    def __str__(self):
+        return f"{self.descricao} - Chamado #{self.chamado_id}"

@@ -57,7 +57,7 @@
           </div>
         </div>
 
-        <!-- 🔥 ANEXOS (ATUALIZADO) -->
+        <!-- 🔥 ANEXOS -->
         <div class="mt-4">
           <div class="sica-meta-label">Anexos</div>
 
@@ -134,6 +134,35 @@
         {% else %}
           <div class="sica-empty-state">
             Sem comentários ainda.
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- 🔥 HISTÓRICO (NOVO) -->
+    <div class="card shadow-sm sica-soft-card mb-4">
+      <div class="card-body p-4">
+        <div class="mb-3">
+          <h2 class="h5 mb-1">Histórico</h2>
+          <p class="sica-top-note mb-0">Linha do tempo das ações realizadas neste chamado.</p>
+        </div>
+
+        {% if chamado.historico.all %}
+          <ul class="list-group">
+            {% for item in chamado.historico.all %}
+              <li class="list-group-item">
+                <div>
+                  <strong>{{ item.usuario.username }}</strong> - {{ item.descricao }}
+                </div>
+                <small class="text-muted">
+                  {{ item.criado_em|date:"d/m/Y H:i" }}
+                </small>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="sica-empty-state">
+            Sem histórico ainda.
           </div>
         {% endif %}
       </div>

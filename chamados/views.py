@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from .forms import ChamadoForm, ComentarioForm, StatusChamadoForm, AnexoForm
-from .models import Categoria, Chamado, Anexo
+from .models import Categoria, Chamado, Anexo, HistoricoChamado
 from .permissoes import is_secretaria, only_aluno_area, only_secretaria
 
 
@@ -74,6 +74,13 @@ def abrir_chamado(request):
             chamado.aluno = request.user
             chamado.save()
 
+            # 🔥 HISTÓRICO (NOVO)
+            HistoricoChamado.objects.create(
+                chamado=chamado,
+                usuario=request.user,
+                descricao="Abriu o chamado"
+            )
+
             for arquivo in arquivos:
                 Anexo.objects.create(
                     chamado=chamado,
@@ -108,6 +115,14 @@ def detalhe_chamado(request, id):
             status_form = StatusChamadoForm(request.POST, instance=chamado)
             if status_form.is_valid():
                 status_form.save()
+
+                # 🔥 HISTÓRICO (NOVO)
+                HistoricoChamado.objects.create(
+                    chamado=chamado,
+                    usuario=request.user,
+                    descricao=f"Alterou status para {chamado.status}"
+                )
+
                 Chamado.objects.filter(id=chamado.id).update(
                     ultima_interacao_em=timezone.now()
                 )
@@ -122,6 +137,13 @@ def detalhe_chamado(request, id):
                 comentario.autor = request.user
                 comentario.chamado = chamado
                 comentario.save()
+
+                # 🔥 HISTÓRICO (NOVO)
+                HistoricoChamado.objects.create(
+                    chamado=chamado,
+                    usuario=request.user,
+                    descricao="Adicionou um comentário"
+                )
 
                 for arquivo in arquivos:
                     Anexo.objects.create(
