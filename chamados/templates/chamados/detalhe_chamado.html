@@ -57,18 +57,27 @@
           </div>
         </div>
 
-        <!-- 🔥 ANEXOS -->
+        <!-- 🔥 ANEXOS (ATUALIZADO) -->
         <div class="mt-4">
           <div class="sica-meta-label">Anexos</div>
 
           {% if chamado.anexos.all %}
             <ul class="list-group mt-2">
               {% for anexo in chamado.anexos.all %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                  <span>{{ anexo.arquivo.name }}</span>
-                  <a href="{{ anexo.arquivo.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                    Baixar
-                  </a>
+                <li class="list-group-item">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <div><strong>{{ anexo.arquivo.name }}</strong></div>
+                      <small class="text-muted">
+                        Enviado por: {{ anexo.enviado_por.username }} |
+                        {{ anexo.enviado_em|date:"d/m/Y H:i" }}
+                      </small>
+                    </div>
+
+                    <a href="{{ anexo.arquivo.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                      Baixar
+                    </a>
+                  </div>
                 </li>
               {% endfor %}
             </ul>
