@@ -2,6 +2,20 @@
 
 {% block content %}
 <div class="sica-page-header">
+  <form method="get" class="mb-4">
+  <div class="input-group">
+    <input 
+      type="text" 
+      name="q" 
+      class="form-control" 
+      placeholder="Buscar por título ou descrição..."
+      value="{{ busca }}"
+    >
+    <button class="btn btn-primary" type="submit">
+      Buscar
+    </button>
+  </div>
+</form>
   <div>
     {% if dashboard_admin %}
       <h1 class="sica-section-title">Minha Área - Admin</h1>

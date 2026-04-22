@@ -2,6 +2,7 @@ from datetime import datetime, time
 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db.models import Q
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -25,12 +26,19 @@ def chamados_secretaria(request):
 
     status = request.GET.get("status", "")
     categoria = request.GET.get("categoria", "")
+    busca = request.GET.get("q", "").strip()
 
     if status:
         qs = qs.filter(status=status)
 
     if categoria:
         qs = qs.filter(categoria_id=categoria)
+
+    if busca:
+        qs = qs.filter(
+            Q(titulo__icontains=busca) |
+            Q(descricao__icontains=busca)
+        )
 
     qs = qs.order_by("-criado_em")
 
@@ -49,6 +57,7 @@ def chamados_secretaria(request):
             "categorias": categorias,
             "status_atual": status,
             "categoria_atual": categoria,
+            "busca": busca,
         },
     )
 
@@ -65,7 +74,6 @@ def abrir_chamado(request):
             chamado.aluno = request.user
             chamado.save()
 
-            # salvar anexos
             for arquivo in arquivos:
                 Anexo.objects.create(
                     chamado=chamado,
@@ -115,7 +123,6 @@ def detalhe_chamado(request, id):
                 comentario.chamado = chamado
                 comentario.save()
 
-                # salvar anexos no comentário (ligados ao chamado)
                 for arquivo in arquivos:
                     Anexo.objects.create(
                         chamado=chamado,
@@ -143,9 +150,16 @@ def detalhe_chamado(request, id):
 @login_required
 def minha_area(request):
     usuario_eh_secretaria = is_secretaria(request.user)
+    busca = request.GET.get("q", "").strip()
 
     if request.user.is_superuser:
         chamados = Chamado.objects.all()
+
+        if busca:
+            chamados = chamados.filter(
+                Q(titulo__icontains=busca) |
+                Q(descricao__icontains=busca)
+            )
 
         data_inicial = request.GET.get("data_inicial", "").strip()
         data_final = request.GET.get("data_final", "").strip()
@@ -188,11 +202,20 @@ def minha_area(request):
                 "ultimos": chamados.order_by("-ultima_interacao_em")[:8],
                 "data_inicial": data_inicial,
                 "data_final": data_final,
+                "busca": busca,
             },
         )
 
     if usuario_eh_secretaria:
-        chamados = Chamado.objects.all().order_by("-ultima_interacao_em")
+        chamados = Chamado.objects.all()
+
+        if busca:
+            chamados = chamados.filter(
+                Q(titulo__icontains=busca) |
+                Q(descricao__icontains=busca)
+            )
+
+        chamados = chamados.order_by("-ultima_interacao_em")
 
         total_abertos = chamados.filter(status="ABERTO").count()
         total_em_atendimento = chamados.filter(status="EM_ATENDIMENTO").count()
@@ -208,10 +231,17 @@ def minha_area(request):
                 "total_em_atendimento": total_em_atendimento,
                 "total_concluidos": total_concluidos,
                 "ultimos": chamados[:5],
+                "busca": busca,
             },
         )
 
     chamados = Chamado.objects.filter(aluno=request.user)
+
+    if busca:
+        chamados = chamados.filter(
+            Q(titulo__icontains=busca) |
+            Q(descricao__icontains=busca)
+        )
 
     total_abertos = chamados.filter(status="ABERTO").count()
     total_em_atendimento = chamados.filter(status="EM_ATENDIMENTO").count()
@@ -227,5 +257,6 @@ def minha_area(request):
             "total_em_atendimento": total_em_atendimento,
             "total_concluidos": total_concluidos,
             "ultimos": chamados.order_by("-criado_em")[:5],
+            "busca": busca,
         },
     )
