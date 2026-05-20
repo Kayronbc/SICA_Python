@@ -1,6 +1,18 @@
 {% extends "base.html" %}
 
 {% block content %}
+<style>
+  .sica-card-scroll {
+    max-height: 320px;
+    overflow-y: auto;
+  }
+
+  .sica-card-scroll-large {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+</style>
+
 <div class="sica-page-header">
   <div>
     <h1 class="sica-section-title">Chamado #{{ chamado.id }}</h1>
@@ -13,13 +25,18 @@
 </div>
 
 <div class="row g-4 sica-detail-layout">
-  <div class="col-12 col-xl-5">
+
+  <!-- 🔵 ESQUERDA -->
+  <div class="col-12 col-xl-6">
+
+    <!-- INFO -->
     <div class="card shadow-sm sica-soft-card">
-      <div class="card-body p-4">
-        <div class="d-flex align-items-start justify-content-between mb-3">
+      <div class="card-body p-3">
+
+        <div class="d-flex align-items-start justify-content-between mb-2">
           <div>
             <div class="sica-meta-label">Título do chamado</div>
-            <div class="fs-5 fw-bold">{{ chamado.titulo }}</div>
+            <div class="fw-bold">{{ chamado.titulo }}</div>
           </div>
 
           <div>
@@ -33,7 +50,7 @@
           </div>
         </div>
 
-        <div class="sica-meta-list mb-4">
+        <div class="sica-meta-list mb-3">
           <div class="sica-meta-item">
             <div class="sica-meta-label">Categoria</div>
             <div class="sica-meta-value">{{ chamado.categoria }}</div>
@@ -52,146 +69,143 @@
 
         <div>
           <div class="sica-meta-label">Descrição</div>
-          <div class="sica-description-box">
+          <div class="sica-description-box sica-card-scroll">
             {{ chamado.descricao }}
           </div>
         </div>
 
-        <!-- 🔥 ANEXOS -->
-        <div class="mt-4">
+        <!-- ANEXOS -->
+        <div class="mt-3">
           <div class="sica-meta-label">Anexos</div>
 
-          {% if chamado.anexos.all %}
-            <ul class="list-group mt-2">
-              {% for anexo in chamado.anexos.all %}
-                <li class="list-group-item">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                      <div><strong>{{ anexo.arquivo.name }}</strong></div>
-                      <small class="text-muted">
-                        Enviado por: {{ anexo.enviado_por.username }} |
-                        {{ anexo.enviado_em|date:"d/m/Y H:i" }}
-                      </small>
-                    </div>
+          <div class="sica-card-scroll">
+            {% if chamado.anexos.all %}
+              <ul class="list-group mt-2">
+                {% for anexo in chamado.anexos.all %}
+                  <li class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <div><strong>{{ anexo.arquivo.name }}</strong></div>
+                        <small class="text-muted">
+                          {{ anexo.enviado_por.username }} |
+                          {{ anexo.enviado_em|date:"d/m/Y H:i" }}
+                        </small>
+                      </div>
 
-                    <a href="{{ anexo.arquivo.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                      Baixar
-                    </a>
+                      <a href="{{ anexo.arquivo.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                        Baixar
+                      </a>
+                    </div>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <div class="text-muted mt-2">Nenhum anexo.</div>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- HISTÓRICO -->
+    <div class="card shadow-sm sica-soft-card mt-3">
+      <div class="card-body p-3">
+        <h2 class="h6 mb-2">Histórico</h2>
+
+        <div class="sica-card-scroll-large">
+          {% if chamado.historico.all %}
+            <ul class="list-group">
+              {% for item in chamado.historico.all %}
+                <li class="list-group-item">
+                  <div>
+                    <strong>{{ item.usuario.username }}</strong> - {{ item.descricao }}
                   </div>
+                  <small class="text-muted">
+                    {{ item.criado_em|date:"d/m/Y H:i" }}
+                  </small>
                 </li>
               {% endfor %}
             </ul>
           {% else %}
-            <div class="text-muted mt-2">Nenhum anexo.</div>
+            <div class="sica-empty-state">
+              Sem histórico ainda.
+            </div>
           {% endif %}
         </div>
-
       </div>
     </div>
 
     {% if is_secretaria %}
-      <div class="card shadow-sm sica-soft-card mt-4">
-        <div class="card-body p-4">
-          <div class="mb-3">
-            <h2 class="h5 mb-1">Atualizar status</h2>
-            <p class="sica-top-note mb-0">Altere o andamento do chamado conforme o atendimento evoluir.</p>
-          </div>
+    <div class="card shadow-sm sica-soft-card mt-3">
+      <div class="card-body p-3">
+        <h2 class="h6 mb-2">Atualizar status</h2>
 
-          <div class="sica-form-soft sica-form-shell">
-            <form method="post">
-              {% csrf_token %}
-              {{ status_form.as_p }}
-              <button type="submit" name="atualizar_status" class="btn btn-primary sica-btn-primary">
-                Atualizar status
-              </button>
-            </form>
-          </div>
-        </div>
+        <form method="post">
+          {% csrf_token %}
+          {{ status_form.as_p }}
+          <button type="submit" name="atualizar_status" class="btn btn-primary btn-sm">
+            Atualizar
+          </button>
+        </form>
       </div>
+    </div>
     {% endif %}
+
   </div>
 
-  <div class="col-12 col-xl-7">
-    <div class="card shadow-sm sica-soft-card mb-4">
-      <div class="card-body p-4">
-        <div class="mb-3">
-          <h2 class="h5 mb-1">Comentários</h2>
-          <p class="sica-top-note mb-0">Histórico de comunicação entre aluno e secretaria.</p>
-        </div>
+  <!-- 🟢 DIREITA -->
+  <div class="col-12 col-xl-6">
 
-        {% if chamado.comentarios.all %}
-          <div class="sica-comment-list">
-            {% for comentario in chamado.comentarios.all %}
-              <div class="sica-comment-item">
-                <div class="sica-comment-head">
-                  <div class="sica-comment-author">{{ comentario.autor.username }}</div>
-                  <div class="sica-comment-date">{{ comentario.criado_em|date:"d/m/Y H:i" }}</div>
+    <!-- COMENTÁRIOS -->
+    <div class="card shadow-sm sica-soft-card mb-3">
+      <div class="card-body p-3">
+        <h2 class="h6 mb-2">Comentários</h2>
+
+        <div class="sica-card-scroll-large">
+          {% if chamado.comentarios.all %}
+            <div class="sica-comment-list">
+              {% for comentario in chamado.comentarios.all %}
+                <div class="sica-comment-item">
+                  <div class="sica-comment-head">
+                    <div class="sica-comment-author">{{ comentario.autor.username }}</div>
+                    <div class="sica-comment-date">{{ comentario.criado_em|date:"d/m/Y H:i" }}</div>
+                  </div>
+                  <div>{{ comentario.mensagem }}</div>
                 </div>
-                <div>{{ comentario.mensagem }}</div>
-              </div>
-            {% endfor %}
-          </div>
-        {% else %}
-          <div class="sica-empty-state">
-            Sem comentários ainda.
-          </div>
-        {% endif %}
-      </div>
-    </div>
-
-    <!-- 🔥 HISTÓRICO (NOVO) -->
-    <div class="card shadow-sm sica-soft-card mb-4">
-      <div class="card-body p-4">
-        <div class="mb-3">
-          <h2 class="h5 mb-1">Histórico</h2>
-          <p class="sica-top-note mb-0">Linha do tempo das ações realizadas neste chamado.</p>
-        </div>
-
-        {% if chamado.historico.all %}
-          <ul class="list-group">
-            {% for item in chamado.historico.all %}
-              <li class="list-group-item">
-                <div>
-                  <strong>{{ item.usuario.username }}</strong> - {{ item.descricao }}
-                </div>
-                <small class="text-muted">
-                  {{ item.criado_em|date:"d/m/Y H:i" }}
-                </small>
-              </li>
-            {% endfor %}
-          </ul>
-        {% else %}
-          <div class="sica-empty-state">
-            Sem histórico ainda.
-          </div>
-        {% endif %}
-      </div>
-    </div>
-
-    <div class="card shadow-sm sica-soft-card">
-      <div class="card-body p-4">
-        <div class="mb-3">
-          <h2 class="h5 mb-1">Adicionar comentário</h2>
-          <p class="sica-top-note mb-0">Registre uma nova mensagem para este chamado.</p>
-        </div>
-
-        <div class="sica-form-soft sica-form-shell">
-          <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            {{ comentario_form.as_p }}
-
-            <div class="mt-3">
-              <label class="form-label">Anexar arquivos</label>
-              <input type="file" name="arquivos" class="form-control" multiple>
+              {% endfor %}
             </div>
-
-            <button type="submit" name="enviar_comentario" class="btn btn-success sica-btn-success mt-3">
-              Enviar comentário
-            </button>
-          </form>
+          {% else %}
+            <div class="sica-empty-state">
+              Sem comentários ainda.
+            </div>
+          {% endif %}
         </div>
       </div>
     </div>
+
+    <!-- NOVO COMENTÁRIO -->
+    <div class="card shadow-sm sica-soft-card">
+      <div class="card-body p-3">
+        <h2 class="h6 mb-2">Adicionar comentário</h2>
+
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          {{ comentario_form.as_p }}
+
+          <div class="mt-2">
+            <label class="form-label">Anexar arquivos</label>
+            <input type="file" name="arquivos" class="form-control" multiple>
+          </div>
+
+          <button type="submit" name="enviar_comentario" class="btn btn-success btn-sm mt-2">
+            Enviar
+          </button>
+        </form>
+      </div>
+    </div>
+
   </div>
+
 </div>
 {% endblock %}

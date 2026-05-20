@@ -138,12 +138,7 @@ def detalhe_chamado(request, id):
                 comentario.chamado = chamado
                 comentario.save()
 
-                # 🔥 HISTÓRICO (NOVO)
-                HistoricoChamado.objects.create(
-                    chamado=chamado,
-                    usuario=request.user,
-                    descricao="Adicionou um comentário"
-                )
+                # ❌ REMOVIDO HISTÓRICO DUPLICADO DAQUI
 
                 for arquivo in arquivos:
                     Anexo.objects.create(
